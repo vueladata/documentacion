@@ -8,7 +8,7 @@ const config = {
   favicon: 'img/favicon.ico',
   future: {v4: true},
 
-  url: 'https://github.com/vueladata/documentacion',
+  url: 'https://vueladata.github.io',
   baseUrl: '/documentacion/',
 
   organizationName: 'vueladata',
