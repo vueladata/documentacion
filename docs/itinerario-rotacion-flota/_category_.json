@@ -1,0 +1,8 @@
+{
+  "label": "Flight Schedule and Fleet Rotation",
+  "position": 3,
+  "link": {
+    "type": "doc",
+    "id": "generador-itinerarios"
+  }
+}

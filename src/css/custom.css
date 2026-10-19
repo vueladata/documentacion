@@ -1,0 +1,23 @@
+:root {
+  --ifm-color-primary: #1679f6;
+  --ifm-color-primary-dark: #0868dc;
+  --ifm-color-primary-darker: #075fc9;
+  --ifm-color-primary-darkest: #064da4;
+  --ifm-color-primary-light: #3989f6;
+  --ifm-color-primary-lighter: #6aa8fa;
+  --ifm-color-primary-lightest: #dbeafe;
+  --ifm-font-family-base: Inter, "Segoe UI", sans-serif;
+  --ifm-code-font-size: 95%;
+}
+[data-theme='dark'] {
+  --ifm-color-primary: #72b8ff;
+  --ifm-color-primary-dark: #4da4ff;
+  --ifm-color-primary-darker: #3296ff;
+  --ifm-color-primary-darkest: #1679f6;
+  --ifm-color-primary-light: #8cc6ff;
+  --ifm-color-primary-lighter: #acd5ff;
+  --ifm-color-primary-lightest: #d5e9ff;
+}
+/* Oculta la barra solo en la portada; en /docs se mantiene visible */
+html:not(.plugin-docs) .navbar { display: none; }
+.main-wrapper { min-width: 0; }

@@ -1,0 +1,8 @@
+{
+  "label": "Transactional Database and Seed",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "base-datos-transaccional-seed"
+  }
+}
