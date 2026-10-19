@@ -8,11 +8,11 @@ const config = {
   favicon: 'img/favicon.ico',
   future: {v4: true},
 
-  url: 'https://lluyss123.github.io',
-  baseUrl: '/documentacion-vueladata/',
+  url: 'https://github.com/vueladata/documentacion',
+  baseUrl: '/documentacion/',
 
-  organizationName: 'lLuyss123',
-  projectName: 'documentacion-vueladata',
+  organizationName: 'vueladata',
+  projectName: 'documentacion',
   onBrokenLinks: 'throw',
   i18n: {defaultLocale: 'es', locales: ['es']},
   presets: [
