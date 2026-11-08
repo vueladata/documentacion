@@ -5,7 +5,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'VuelaData',
   tagline: 'Tu viaje, mejor informado',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/vueladata-logo.png',
   future: {v4: true},
 
   url: 'https://vueladata.github.io',
@@ -24,10 +24,10 @@ const config = {
   ],
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
-    colorMode: {defaultMode: 'light', disableSwitch: true},
+    colorMode: {defaultMode: 'dark', disableSwitch: true},
     navbar: {
       title: 'VuelaData',
-      logo: {alt: 'VuelaData', src: 'img/logo.svg'},
+      logo: {alt: 'VuelaData', src: 'img/vueladata-logo.png'},
       items: [
         {type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'right', label: 'Documentación técnica'},
       ],
@@ -40,7 +40,7 @@ const config = {
       ]}],
       copyright: `VuelaData · ${new Date().getFullYear()} · Prototipo de experiencia de viaje`,
     },
-    prism: {theme: prismThemes.github, darkTheme: prismThemes.dracula},
+    prism: {theme: prismThemes.dracula, darkTheme: prismThemes.dracula},
   },
 };
 export default config;

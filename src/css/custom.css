@@ -1,23 +1,394 @@
+/**
+ * VuelaData Dark Blue Theme
+ * Matching the main page aesthetic: Primary Dark Blue #064da4 & Deep Navy #081b34
+ * High-contrast white typography for optimal readability
+ */
+
 :root {
-  --ifm-color-primary: #1679f6;
-  --ifm-color-primary-dark: #0868dc;
-  --ifm-color-primary-darker: #075fc9;
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
   --ifm-color-primary-darkest: #064da4;
-  --ifm-color-primary-light: #3989f6;
-  --ifm-color-primary-lighter: #6aa8fa;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
   --ifm-color-primary-lightest: #dbeafe;
-  --ifm-font-family-base: Inter, "Segoe UI", sans-serif;
-  --ifm-code-font-size: 95%;
+
+  --ifm-font-family-base: Inter, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --ifm-code-font-size: 92%;
+
+  /* VuelaData Core Palette */
+  --vueladata-blue-primary: #064da4;
+  --vueladata-blue-dark: #081b34;
+  --vueladata-blue-darker: #051427;
+  --vueladata-blue-surface: #0b2447;
+  --vueladata-blue-border: #1a3c6b;
+  --vueladata-blue-accent: #72b8ff;
+
+  /* Global Infima Overrides for Dark Blue Theme */
+  --ifm-background-color: #081b34;
+  --ifm-background-surface-color: #0b2447;
+  --ifm-font-color-base: #f1f5f9;
+  --ifm-heading-color: #ffffff;
+  --ifm-link-color: #60a5fa;
+  --ifm-link-hover-color: #93c5fd;
+
+  --ifm-navbar-background-color: #064da4;
+  --ifm-navbar-link-color: #ffffff;
+  --ifm-navbar-link-hover-color: #bfdbfe;
+
+  --ifm-menu-color: #cbd5e1;
+  --ifm-menu-color-active: #ffffff;
+  --ifm-menu-color-background-active: #064da4;
+  --ifm-menu-color-background-hover: rgba(6, 77, 164, 0.45);
+
+  --ifm-toc-link-color: #94a3b8;
+  --ifm-toc-link-active-color: #60a5fa;
+
+  --ifm-table-head-background: #064da4;
+  --ifm-table-head-color: #ffffff;
+  --ifm-table-border-color: #1a3c6b;
+  --ifm-table-stripe-background: rgba(6, 77, 164, 0.18);
+
+  --ifm-code-background: #051427;
+  --ifm-code-color: #93c5fd;
+  --ifm-card-background-color: #0b2447;
+  --ifm-footer-background-color: #051427;
+  --ifm-hr-border-color: #1a3c6b;
 }
-[data-theme='dark'] {
-  --ifm-color-primary: #72b8ff;
-  --ifm-color-primary-dark: #4da4ff;
-  --ifm-color-primary-darker: #3296ff;
-  --ifm-color-primary-darkest: #1679f6;
-  --ifm-color-primary-light: #8cc6ff;
-  --ifm-color-primary-lighter: #acd5ff;
-  --ifm-color-primary-lightest: #d5e9ff;
+
+[data-theme='dark'],
+[data-theme='light'] {
+  --ifm-background-color: #081b34;
+  --ifm-background-surface-color: #0b2447;
+  --ifm-font-color-base: #f1f5f9;
+  --ifm-heading-color: #ffffff;
+  --ifm-navbar-background-color: #064da4;
+  --ifm-table-head-background: #064da4;
+  --ifm-table-head-color: #ffffff;
+  --ifm-table-border-color: #1a3c6b;
 }
-/* Oculta la barra solo en la portada; en /docs se mantiene visible */
-html:not(.plugin-docs) .navbar { display: none; }
-.main-wrapper { min-width: 0; }
+
+/* Oculta la barra de navegación solo en la página principal */
+html:not(.plugin-docs) .navbar {
+  display: none;
+}
+
+.main-wrapper {
+  min-width: 0;
+  background-color: #081b34;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   NAVBAR (Barra superior)
+   ───────────────────────────────────────────────────────────────────────────── */
+.navbar {
+  background: linear-gradient(90deg, #064da4 0%, #08244a 100%) !important;
+  border-bottom: 1px solid #1a3c6b !important;
+  box-shadow: 0 4px 20px rgba(5, 20, 42, 0.4);
+}
+
+.navbar__brand {
+  margin-right: 24px;
+}
+
+.navbar__title {
+  color: #ffffff !important;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  font-size: 1.25rem;
+}
+
+.navbar__logo {
+  height: 36px;
+  margin-right: 10px;
+}
+
+.navbar__logo img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar__link {
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.15s ease;
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  color: #93c5fd !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SIDEBAR (Menú lateral de documentación)
+   ───────────────────────────────────────────────────────────────────────────── */
+.theme-doc-sidebar-container {
+  background-color: #051427 !important;
+  border-right: 1px solid #1a3c6b !important;
+}
+
+.theme-doc-sidebar-menu {
+  padding: 1rem 0.5rem;
+}
+
+.theme-doc-sidebar-menu .menu__link {
+  color: #cbd5e1 !important;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.theme-doc-sidebar-menu .menu__link:hover {
+  color: #ffffff !important;
+  background: rgba(6, 77, 164, 0.45) !important;
+}
+
+.theme-doc-sidebar-menu .menu__link--active:not(.menu__link--sublist) {
+  background-color: #064da4 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 10px rgba(6, 77, 164, 0.4);
+}
+
+.menu__list-item-collapsible .menu__link--active {
+  color: #72b8ff !important;
+}
+
+.menu__caret:before {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TYPOGRAPHY & MARKDOWN CONTENT (Texto en blanco con alto contraste)
+   ───────────────────────────────────────────────────────────────────────────── */
+.markdown {
+  color: #f1f5f9 !important;
+}
+
+.markdown h1 {
+  color: #ffffff !important;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  border-bottom: 2px solid #1a3c6b;
+  padding-bottom: 0.5rem;
+}
+
+.markdown h2 {
+  color: #ffffff !important;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid #1a3c6b;
+  padding-bottom: 0.4rem;
+  margin-top: 2rem;
+}
+
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.markdown p,
+.markdown li {
+  color: #e2e8f0 !important;
+  line-height: 1.7;
+}
+
+.markdown strong {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.markdown a {
+  color: #72b8ff !important;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.markdown a:hover {
+  color: #bfdbfe !important;
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABLES (Tablas con fondo azul oscuro, cabecera #064da4 y texto blanco)
+   ───────────────────────────────────────────────────────────────────────────── */
+.markdown table {
+  display: table !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1.5rem 0 !important;
+  border: 1px solid #1a3c6b !important;
+  background-color: #09203e !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 15px rgba(5, 20, 42, 0.25);
+}
+
+.markdown table th {
+  background-color: #064da4 !important;
+  color: #ffffff !important;
+  font-weight: 750 !important;
+  border: 1px solid #1a3c6b !important;
+  padding: 11px 15px !important;
+  text-align: left !important;
+  font-size: 0.88rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.markdown table td {
+  border: 1px solid #1a3c6b !important;
+  padding: 10px 14px !important;
+  color: #f1f5f9 !important;
+  font-size: 0.9rem !important;
+}
+
+.markdown table tr:nth-child(2n) {
+  background-color: rgba(6, 77, 164, 0.14) !important;
+}
+
+.markdown table tr:hover {
+  background-color: rgba(6, 77, 164, 0.28) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADMONITIONS (Alerts y Callouts de GitHub en azul oscuro)
+   ───────────────────────────────────────────────────────────────────────────── */
+.alert {
+  background-color: #0b2447 !important;
+  border: 1px solid #1a3c6b !important;
+  color: #f1f5f9 !important;
+  border-radius: 8px !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1.5rem 0 !important;
+  box-shadow: 0 4px 15px rgba(5, 20, 42, 0.2);
+}
+
+.alert strong,
+.alert p,
+.alert li {
+  color: #ffffff !important;
+}
+
+.alert--info {
+  border-left: 4px solid #3b82f6 !important;
+  background-color: rgba(6, 77, 164, 0.3) !important;
+}
+
+.alert--success {
+  border-left: 4px solid #10b981 !important;
+  background-color: rgba(6, 78, 59, 0.3) !important;
+}
+
+.alert--warning {
+  border-left: 4px solid #f59e0b !important;
+  background-color: rgba(120, 53, 15, 0.3) !important;
+}
+
+.alert--danger {
+  border-left: 4px solid #ef4444 !important;
+  background-color: rgba(127, 29, 29, 0.3) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CODE BLOCKS & INLINE CODE
+   ───────────────────────────────────────────────────────────────────────────── */
+.markdown code {
+  background-color: #051427 !important;
+  color: #93c5fd !important;
+  border: 1px solid #1a3c6b !important;
+  border-radius: 5px !important;
+  padding: 2px 7px !important;
+  font-size: 0.88em !important;
+}
+
+.theme-code-block {
+  border: 1px solid #1a3c6b !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(5, 20, 42, 0.35);
+  background-color: #051427 !important;
+}
+
+.prism-code {
+  background-color: #051427 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABLE OF CONTENTS & BREADCRUMBS
+   ───────────────────────────────────────────────────────────────────────────── */
+.table-of-contents__link {
+  color: #94a3b8 !important;
+  font-size: 0.85rem !important;
+  transition: color 0.15s ease;
+}
+
+.table-of-contents__link:hover,
+.table-of-contents__link--active {
+  color: #60a5fa !important;
+  font-weight: 600;
+}
+
+.breadcrumbs__link {
+  color: #94a3b8 !important;
+}
+
+.breadcrumbs__link:hover {
+  color: #ffffff !important;
+}
+
+.pagination-nav__link {
+  border: 1px solid #1a3c6b !important;
+  background: #0b2447 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.pagination-nav__link:hover {
+  border-color: #3b82f6 !important;
+  background: #064da4 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(6, 77, 164, 0.4);
+}
+
+.pagination-nav__sublabel {
+  color: #94a3b8 !important;
+}
+
+.pagination-nav__label {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FOOTER (Pie de página en documentación)
+   ───────────────────────────────────────────────────────────────────────────── */
+.footer {
+  background-color: #051427 !important;
+  border-top: 1px solid #1a3c6b !important;
+  color: #e2e8f0 !important;
+}
+
+.footer__title {
+  color: #ffffff !important;
+}
+
+.footer__link-item {
+  color: #cbd5e1 !important;
+}
+
+.footer__link-item:hover {
+  color: #72b8ff !important;
+}
+
+.footer__copyright {
+  color: #94a3b8 !important;
+}
