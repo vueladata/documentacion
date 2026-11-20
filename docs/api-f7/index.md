@@ -1,287 +1,36 @@
 ---
 id: api-f7
-title: "F7 API — Compensation, Payments, and Background Workers"
-sidebar_label: "F7 API: Compensation and Workers"
-description: "Operational REST service and background workers for operational disruptions, compensation rules, asynchronous payment gateway, and email notifications."
+title: API de pasajeros, compensaciones y pagos
+sidebar_label: API y workers
+sidebar_position: 4
 tags: [fastapi, sqlalchemy, postgresql, docker, rest-api, rabbitmq, celery, workers]
 ---
 
-# F7 API — Compensation, Payments, and Background Workers
+FastAPI ofrece consultas a pasajeros y las operaciones de F7 para compensaciones y pagos simulados. El backend y los tres workers comparten una imagen de contenedor. [Repositorio, instalación y pruebas](https://github.com/vueladata/vueladata-api). [URLs de AWS y estado del despliegue](../orchestration/accesos-aws.md#endpoints).
 
-Operational REST web service within the **VuelaData** regional airline data platform. This component corresponds to **Source F7**, responsible for simulating an asynchronous payment gateway, logging flight disruptions, and managing financial compensation for passengers affected by delays or cancellations.
+## API REST
 
-In addition to the HTTP REST server, this module contains the platform's **background processes (workers)** sharing the same Docker base image: transactional queue consumer (`worker_rds`), raw lakehouse writer (`worker_lake`), automated passenger email dispatcher (`worker_notificaciones`), and the standalone event simulator (`simulate_stream.py`).
+| Recurso | Operación |
+| --- | --- |
+| `GET /pasajeros/{id_pasajero}` | Perfil del pasajero. |
+| `GET /pasajeros/{id_pasajero}/itinerarios` | Reservas propias, vuelos, evaluaciones de conexión y reubicaciones. `/pasajeros/{id_pasajero}/reservas` es un alias. |
+| `GET /pasajeros/{id_pasajero}/compensaciones` | Compensaciones, pagos y notificaciones propios. |
+| `GET /reservas/{codigo_reserva}/estado` | Estado consolidado de una reserva del pasajero. |
+| `/causas/`, `/reglas-compensacion/`, `/compensaciones/` | Alta, consulta, actualización parcial y eliminación por recurso. |
+| `/pagos/`, `/pagos/idempotencia/{clave}` | Solicitudes de desembolso y consulta por clave de idempotencia. |
+| `/eventos-pago/` | Consulta y registro de confirmaciones F7. |
+| `GET /health`, `GET /health/db` | Salud de la API y conectividad a PostgreSQL, respectivamente. |
 
-> [!NOTE]
-> Multi-container orchestration and deployment for the API and its workers is centralized in the **`vueladata-orchestration`** repository via `docker compose up -d --build`.
+Las rutas de pasajeros aplican RN-11 comparando la cabecera `X-Pasajero-Id` con el pasajero del recurso. Responden `401` si falta, `403` si la identidad declarada no corresponde y `404` si el recurso solicitado no existe. El prototipo acepta la identidad declarada por el cliente. Para exponer estas consultas con datos reales se requiere una capa de autenticación que verifique la identidad.
 
----
+La clave de idempotencia de `pago` y el identificador externo de `evento_pago` respaldan RN-09. El esquema SQL impone la unicidad de la compensación por segmento y del pago por compensación. [Diccionario de datos](../base-datos-transaccional-seed/diccionario-datos.md).
 
-## 🛠️ Technologies and Stack
+## Consumidores
 
-- **Python 3.12+**
-- **FastAPI 0.143+** (ASGI web server powered by Uvicorn)
-- **SQLAlchemy 2.0 / 2.1+** (modern typed ORM)
-- **Pydantic v2** (strict schema validation and parsing)
-- **PostgreSQL 16** with native `psycopg` driver connecting to the `vueladata` operational schema
-- **RabbitMQ 3** (AMQP message broker and `topic` exchange)
-- **uv** (high-performance package and virtual environment manager)
-- **Docker & Docker Compose** (optimized multi-process image based on `python:3.12-slim`)
-- **Pytest** and `TestClient` (test suite with 39 automated tests)
-- **Gmail SMTP** (transactional email dispatch with TLS)
+| Proceso | Entrada y salida |
+| --- | --- |
+| `worker_rds` | Consume `q.rds_writer`. Persiste OOOI, resuelve OpenSky por ICAO24 y clima por IATA. Publica en `q.rds_unresolved` los eventos de fuentes externas que carecen de catálogo. |
+| `worker_lake` | Consume `q.lake_writer` y guarda datos crudos en Bronze. Para F2 y F3 escribe NDJSON en `bronze/events/opensky/` y `bronze/events/clima/`. El fallback a disco es opcional para desarrollo. |
+| `worker_notificaciones` | Consume `q.notificaciones_email` del exchange topic `vueladata.notificaciones`. Envía correo HTML por SMTP y registra su estado en PostgreSQL. |
 
----
-
-## 📋 User Stories Covered
-
-- **HU-04 – Configure Operational Backend Base and ORM:** Modular FastAPI architecture, SQLAlchemy 2.0 persistence with `psycopg` driver targeting the `vueladata` relational schema. Strict Pydantic modeling.
-- **HU-05 – Implement CRUD Endpoints and Documentation:** Comprehensive CRUD operations for operational causes, compensation rules, compensation records, payments, and payment events. Autogenerated OpenAPI / Swagger interactive documentation.
-- **HU-20 – Containerize Applications with Optimized Dockerfiles:** Optimized Docker image (`python:3.12-slim`), executed under a non-root unprivileged user (`appuser`, UID 1000). Unified multi-container orchestration managed from `vueladata-orchestration`.
-- **HU-25 – Reliable Message Consumption (worker_rds):** Explicit acknowledgement (`ACK`) on successful persistence, and reject/requeue (`NACK`) handling based on operational error classifications.
-
----
-
-## 🏗️ F7 Architecture and Component Flow
-
-```mermaid
-flowchart TD
-    subgraph Messaging["RabbitMQ Message Broker"]
-        QueueRDS["RDS Queue (q.rds_writer)"]
-        QueueLake["Lake Queue (q.lake_writer)"]
-        TopicEx["Topic Exchange (amq.topic)"]
-        QueueMail["Notifications Queue (q.notificaciones)"]
-    end
-
-    subgraph F7Module["F7 Microservice (FastAPI & Workers)"]
-        API["FastAPI REST API\n(Port 8000)"]
-        WRDS["worker_rds\n(AMQP Consumer)"]
-        WLake["worker_lake\n(Data Lake Writer)"]
-        WNotif["worker_notificaciones\n(SMTP Mailer)"]
-        Sim["simulate_stream.py\n(Event Simulator)"]
-    end
-
-    subgraph Storage["Persistence Layer"]
-        PG[("PostgreSQL 16\nvueladata schema")]
-        S3[("S3 Bronze / Local Lake\nRaw JSON")]
-    end
-
-    Sim -->|Publishes events| QueueRDS
-    Sim -->|Publishes events| QueueLake
-    QueueRDS -->|Consumes with ACK/NACK| WRDS
-    WRDS -->|Persists disruptions| PG
-    WRDS -->|Publishes disruption events| TopicEx
-    TopicEx -->|vuelo.* / conexion.* / itinerario.*| QueueMail
-    QueueMail --> WNotif
-    WNotif -->|Local-time passenger emails| Passengers[("Passengers (Gmail SMTP)")]
-    QueueLake --> WLake
-    WLake -->|Time / count batch flush| S3
-    API <-->|CRUD Compensation & Payments| PG
-```
-
-### Auxiliary Processes and Background Workers
-
-1. **`worker_rds` (`python -m worker_rds.main`):**
-   - Consumes OOOI telemetry events and flight statuses from RabbitMQ (`QUEUE_RDS`).
-   - Evaluates delay thresholds and cancellations against the `vueladata` schema.
-   - Enforces strict `ACK` (success acknowledgement) and `NACK` (requeue on transient failure, discard on irrecoverable payload) policies.
-   - Publishes business disruption events to the `amq.topic` exchange for flight cancellations, significant delays, and rebookings.
-2. **`worker_lake` (`python -m worker_lake.main`):**
-   - Consumes raw events from RabbitMQ (`QUEUE_LAKE`).
-   - Buffers messages in memory and flushes batches every `LAKE_FLUSH_EVERY_N` messages (default 50) or every `LAKE_FLUSH_EVERY_SECONDS` (default 60 seconds).
-   - Writes compressed raw records directly to the AWS S3 Bronze Data Lake bucket or local fallback storage (`LOCAL_LAKE_FALLBACK=true`).
-3. **`worker_notificaciones` (`python -m worker_notificaciones.main`):**
-   - Subscribes to disruption messages on the topic exchange.
-   - Generates personalized HTML emails displaying local timestamps for affected airports (**RN-02**).
-   - Sends automated alerts via Gmail SMTP, supporting cancellations, delay compensations, at-risk connections, and rebookings.
-4. **`simulate_stream.py`:**
-   - Standalone utility script that publishes test event streams directly into RabbitMQ queues without requiring external simulators.
-
----
-
-## ⚖️ Implemented Business Rules
-
-- **RN-02 (Local Time):** Passenger notification emails convert UTC flight timestamps to the official local time zone of the departure and arrival airports.
-- **RN-03 (Airline-Imputable Causes):** Classification separating airline-controllable disruptions (`es_imputable = true`, e.g., maintenance, crew constraints) from non-imputable causes (`es_imputable = false`, e.g., severe weather, air traffic control restrictions).
-- **RN-04 (Severe Weather Conditions):** Evaluation of METAR weather parameters (sustained wind speed, gusts, runway visual range, active thunderstorms).
-- **RN-05 (Compensation Scale):** Graduated financial compensation based on imputable delay duration and cancellation notice:
-  - **Imputable delay between 2 and 4 hours:** 25% of the affected flight segment fare.
-  - **Imputable delay between 4 and 6 hours:** 50% of the affected flight segment fare.
-  - **Imputable delay exceeding 6 hours:** 100% of the affected flight segment fare.
-  - **Airline-caused cancellation with less than 72 hours notice:** 100% compensation plus mandatory flight rebooking.
-- **RN-06 (Passenger Rebooking):** Automatic or manual allocation of available alternative flight segments when an original flight is cancelled.
-- **RN-07 (At-Risk Connections):** Continuous tracking of minimum connecting time (MCT) at layover airports. If an inbound flight's delay reduces transfer time below the threshold, an early warning (`conexion.en_riesgo`) is emitted.
-- **RN-09 (Single Payment and Idempotency):**
-  - A passenger booking segment (`id_detalle_reserva`) cannot receive more than one financial compensation claim.
-  - Every payment dispatch request requires a unique `clave_idempotencia` header/field to block duplicate charges.
-  - Asynchronous payment callback events validate idempotency using `id_externo_evento`.
-
----
-
-## 🚀 Quick Start (with Docker Compose)
-
-The full multi-container development environment (PostgreSQL database, RabbitMQ message broker, REST API, and associated workers) is started using the `docker-compose.yml` file in the central **`vueladata-orchestration`** repository.
-
-From the root directory of `vueladata-orchestration`:
-
-```bash
-docker compose up -d --build
-```
-
-### Services Exposed by the F7 Module
-
-| Service | Container | Local Port | Description |
-|---|---|:---:|---|
-| **REST API** | `vueladata-api` | `8000` | FastAPI ASGI application server |
-| **PostgreSQL** | `vueladata-postgres` | `5433` (or `5432`) | Relational operational database |
-| **RabbitMQ** | `vueladata-rabbitmq` | `5672` / `15672` | AMQP broker and web management interface |
-| **Worker RDS** | `vueladata-worker-rds` | N/A | Reliable transactional consumer with ACK/NACK |
-| **Worker Lake** | `vueladata-worker-lake` | N/A | Batch writer flushing to the Bronze Data Lake |
-| **Worker Notifications** | `vueladata-worker-notificaciones` | N/A | Automated email notification dispatcher |
-
-### Useful Local Endpoints
-
-- **Interactive API Documentation (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **OpenAPI Specification (JSON):** [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
-- **API Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
-- **Database Connection Health Check:** [http://localhost:8000/health/db](http://localhost:8000/health/db)
-- **RabbitMQ Web Management Console:** [http://localhost:15672](http://localhost:15672)
-
-To stop all services:
-
-```bash
-docker compose down
-```
-
----
-
-## 💻 Local Development Without Docker
-
-### 1. Prerequisites
-
-- Python 3.12 or higher.
-- Package manager `uv` (or `pip`).
-- Running PostgreSQL instance with the `vueladata` schema initialized.
-- Running RabbitMQ broker with port `5672` accessible on `localhost`.
-
-### 2. Install Dependencies
-
-```bash
-uv sync
-```
-
-### 3. Environment Variables Configuration
-
-Copy `.env.example` as `.env` in the project root:
-
-```env
-DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5433/vueladata
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USER=rabbit_admin
-RABBITMQ_PASS=VuelaData_Rabbit2026!
-QUEUE_RDS=q.rds_writer
-QUEUE_LAKE=q.lake_writer
-PORT=8000
-```
-
-> [!IMPORTANT]
-> **Queue Configuration (Workers vs Simulator):**
-> By default, the simulator publishes to `q.rds_writer` and `q.lake_writer`. Verify that `QUEUE_RDS` and `QUEUE_LAKE` in your `.env` match these names to ensure seamless local message flow.
-
-### 4. Start the Development Server
-
-```bash
-uv run fastapi dev app/main.py
-```
-
-The API will be available with hot-reload at `http://localhost:8000`.
-
-### 5. Running Workers in Separate Consoles
-
-```bash
-# Terminal 1: Database persistence worker
-uv run python -m worker_rds.main
-
-# Terminal 2: Bronze Data Lake writer worker
-uv run python -m worker_lake.main
-
-# Terminal 3: Email notification worker
-uv run python -m worker_notificaciones.main
-
-# Terminal 4: Standalone event simulator
-uv run python simulate_stream.py
-```
-
----
-
-## 📧 Passenger Email Notifications (RabbitMQ + Gmail)
-
-When a flight disruption occurs, `worker_rds` processes the telemetry and publishes an event to the `amq.topic` exchange. `worker_notificaciones` consumes this event and delivers an email to the passenger.
-
-### Topic Routing Keys and Notification Types
-
-| Routing Key | Published When | `notificacion.tipo` | Action Triggered |
-|---|---|---|---|
-| `vuelo.cancelado` | A `CANCEL` event arrives | `INTERRUPCION` | Informs passenger of cancellation and presents options |
-| `vuelo.retrasado` | An `OUT` event has imputable delay $\ge 120$ min | `INTERRUPCION` | Informs delay duration and eligible compensation |
-| `conexion.en_riesgo` | Delay violates minimum connecting time | `CONEXION_RIESGO` | Early warning alert for ground connection assistance |
-| `itinerario.cambiado` | Rebooking is confirmed after cancellation | `REUBICACION` | Sends updated itinerary and new flight segment details |
-
-### SMTP Configuration (Gmail)
-
-1. Enable 2-Step Verification in your Google account.
-2. Generate an **App Password** for VuelaData.
-3. Configure your `.env` file:
-   ```env
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USUARIO=your_email@gmail.com
-   SMTP_CLAVE=your_app_password
-   SMTP_REMITENTE=notifications@vueladata.com
-   EMAIL_DESTINO_PRUEBAS=team_mailbox@gmail.com
-   ```
-
-> [!CAUTION]
-> **Safe Testing Mode:**
-> Always keep `EMAIL_DESTINO_PRUEBAS` pointed to your own team mailbox during development. This prevents emails from being routed to fictitious passenger addresses created in test seed datasets.
-
----
-
-## 📋 Documented REST Endpoints
-
-| Resource | Method | Endpoint | Description |
-|---|---|---|---|
-| **Health** | `GET` | `/health` | Check API application container status. |
-| **Health DB** | `GET` | `/health/db` | Validate active connectivity to PostgreSQL. |
-| **Causes** | `GET` | `/causas/` | List operational causes catalog. |
-| **Causes** | `POST` | `/causas/` | Register a new delay/cancellation operational cause. |
-| **Causes** | `GET` | `/causas/{id}` | Retrieve operational cause by internal ID. |
-| **Causes** | `PATCH` | `/causas/{id}` | Partially update an operational cause. |
-| **Causes** | `DELETE` | `/causas/{id}` | Remove an operational cause from the catalog. |
-| **Rules** | `GET` | `/reglas-compensacion/` | List active compensation rules and percentages. |
-| **Rules** | `POST` | `/reglas-compensacion/` | Define a new compensation rule. |
-| **Compensation** | `GET` | `/compensaciones/` | Query list of issued compensation claims. |
-| **Compensation** | `POST` | `/compensaciones/` | Issue compensation for an affected booking segment. |
-| **Payments** | `GET` | `/pagos/` | List payment requests and current statuses. |
-| **Payments** | `POST` | `/pagos/` | Initiate payout with mandatory idempotency key. |
-| **Payments** | `GET` | `/pagos/idempotencia/{clave}` | Retrieve payment status by `clave_idempotencia`. |
-| **Payment Events** | `POST` | `/eventos-pago/` | Asynchronous webhook receiving gateway payment confirmations. |
-
----
-
-## 🧪 Automated Testing
-
-The automated test suite validates OpenAPI contracts, end-to-end CRUD persistence, and event-driven worker logic:
-
-```bash
-uv run pytest -v
-```
-
-### Coverage of 39 Defined Tests
-
-- Strict Pydantic schema validation (data types, required fields, allowed values).
-- Full CRUD lifecycle for operational causes and compensation rules.
-- HTTP error handling (404 for missing resources, 422 for schema mismatches, 409 for duplicate conflicts).
-- Verification of the autogenerated OpenAPI contract against expected specifications.
-- `worker_rds` business logic: delay evaluation, cancellation detection, and topic exchange publishing.
-- HTML email template rendering and field formatting in `worker_notificaciones`.
+`worker_rds` evalúa conexiones y reubicaciones para pasajeros afectados al procesar eventos operacionales. El exchange de notificaciones usa las claves `vuelo.cancelado`, `vuelo.retrasado`, `conexion.en_riesgo` e `itinerario.cambiado`. Para pruebas SMTP usa `EMAIL_DESTINO_PRUEBAS` y suministra las credenciales desde el entorno. [ADR de notificaciones](../adr/006-notificaciones.md).

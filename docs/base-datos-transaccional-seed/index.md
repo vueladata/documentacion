@@ -18,4 +18,4 @@ This section contains documents about the operational database structure and the
 
 ## Schema Scope
 
-The data dictionary describes the operational `vueladata` schema. According to the supplied material, the large F1 historical dataset is processed in the analytical Data Lake and is not part of this transactional database.
+The data dictionary describes the operational `vueladata` schema. Airflow stores its metadata in `airflow_db`. Spark processes the F1 historical dataset in the analytical Data Lake. [Database repository](https://github.com/vueladata/vueladata-database). [PostgreSQL ADR](../adr/001-postgresql.md).

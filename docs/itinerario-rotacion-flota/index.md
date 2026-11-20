@@ -16,7 +16,7 @@ The data is for simulation and testing. It is not a real commercial flight sched
 
 ## Technologies
 
-- Python.
+- Python 3.13 or newer.
 - Pandas to load, clean, transform, and export tabular data.
 - NumPy for numerical calculations and repeatable random values.
 - CSV as the input and output format.
@@ -25,7 +25,7 @@ The data is for simulation and testing. It is not a real commercial flight sched
 ## Repository Structure
 
 ```text
-data-sources/
+vueladata-csv/
 ├── reference/
 │   ├── airports.csv
 │   └── airlines.csv
@@ -39,7 +39,7 @@ data-sources/
         └── synthetic_weekly_itinerary.csv
 ```
 
-The README identifies `airports.csv` as the main source. `airlines.csv` is available as a reference, but the current generator does not need to use it directly. The script does not create an additional airport CSV.
+`reference/airports.csv` is the generator input. `airlines.csv` is available as a reference, but the current generator does not need to use it directly. The script does not create an additional airport CSV.
 
 ## Source: `airports.csv`
 
@@ -75,7 +75,7 @@ Estimated duration (minutes) =
     + Extra minutes
 ```
 
-The README describes these settings:
+The script uses the following settings.
 
 | Parameter | Value |
 |---|---:|
@@ -84,6 +84,8 @@ The README describes these settings:
 | Ground time between consecutive flights | 45 minutes |
 | Fictional aircraft registrations | 30 |
 | Weekly schedule target | 2,700 flights |
+| Week start | 2026-10-19 |
+| Random seed | 42 |
 
 These values are for simulation. The estimated duration does not include every factor involved in a real flight operation.
 
@@ -125,13 +127,13 @@ Open a terminal in the `fleet_itinerary` folder.
 Install or sync the declared dependencies:
 
 ```powershell
-uv sync
+uv sync --locked --no-install-project
 ```
 
 Run the generator:
 
 ```powershell
-uv run python generate_fleet_itinerary.py
+uv run --no-sync python generate_fleet_itinerary.py
 ```
 
 The script prints information about airports, routes, the fleet, and validation results. The CSV files are saved in `output/`.
@@ -152,6 +154,6 @@ If the generator cannot create a valid schedule, it should report an error inste
 An airport being part of the network does not guarantee that it will appear in the weekly schedule. The number of flights that can be scheduled depends on distances, estimated durations, ground time, and aircraft availability.
 :::
 
-## Connection to the Transactional Database
+## Data Lake integration
 
-The generator creates CSV files. The README does not describe an automatic load of these files into PostgreSQL or an import contract for the transactional database. This integration should be documented when a confirmed process exists.
+The generator writes the three F6 CSV files locally. Spark reads them from `bronze/f6_rotacion/` once they are uploaded to S3. [ETL inputs](../orchestration/index.md#cómo-circulan-los-datos). [Generator repository](https://github.com/vueladata/vueladata-csv).

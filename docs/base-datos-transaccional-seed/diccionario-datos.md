@@ -10,13 +10,13 @@ tags: [postgresql, relational-model, data-dictionary]
 
 ## Scope
 
-This document describes the operational `vueladata` schema, based on the supplied data dictionary, which says the schema is defined in `schema_postgresql.sql`. The large F1 historical dataset is processed in the analytical Data Lake and is not part of this transactional database.
+This document describes the operational `vueladata` schema, defined in [schema_postgresql.sql](https://github.com/vueladata/vueladata-database/blob/master/schema_postgresql.sql).
 
 ## Conventions
 
 | Convention | Meaning |
 |---|---|
-| `id_*` | Primary key or foreign key. The source document says primary keys use `IDENTITY`. |
+| `id_*` | Primary key or foreign key. Primary keys use `IDENTITY`. |
 | `_utc` | Timestamp stored in UTC using `timestamptz`. |
 | `codigo` | Stable, readable technical value used by integrations and rules. |
 | `id_externo_*` | External source identifier used for idempotency; it is not a foreign key. |
@@ -31,7 +31,7 @@ This document describes the operational `vueladata` schema, based on the supplie
 | `ciudad` | Cities where airports are located. | Foreign key to `pais`; city name is unique within a country. |
 | `aeropuerto` | Airports used for departure, arrival, connections, or diversions. | Foreign key to `ciudad`; IATA code is unique; ICAO code is optional and unique. |
 | `aerolinea` | Airline catalog. | IATA code is unique. |
-| `aeronave` | Aircraft assigned to an airline. | Foreign key to `aerolinea`; registration is unique; capacity must be greater than zero. |
+| `aeronave` | Aircraft assigned to an airline. | Foreign key to `aerolinea`; registration is unique, and capacity must be greater than zero. The optional, unique `codigo_icao24` links OpenSky events to the aircraft catalog. |
 | `ruta` | Route between two airports. | Foreign keys to origin and destination airports; the origin-destination pair is unique and the airports must be different. |
 | `estado_vuelo` | Operational flight status catalog. | Includes `PROGRAMADO`, `SALIDA_PUERTA`, `DESPEGADO`, `ATERRIZADO`, `LLEGADA_PUERTA`, `CANCELADO`, and `DESVIADO`. |
 | `vuelo` | A scheduled flight instance. | Foreign keys to route, aircraft, and status; stores scheduled times, actual OOOI times, and a possible diversion airport. |
@@ -50,7 +50,7 @@ The `vuelo` table stores four times:
 | `aterrizaje_real_utc` | `ON` | Actual landing. |
 | `llegada_real_puerta_utc` | `IN` | Actual arrival at the gate; used for OTP according to the source document. |
 
-The data dictionary says a database trigger updates the flight status and OOOI times when an event has the `VALIDO` status.
+The database trigger `trg_actualizar_estado_vuelo_desde_evento` updates the flight status and OOOI times when an event has the `VALIDO` status.
 
 ## 2. Reservations, Itineraries, and Connections
 
@@ -99,5 +99,5 @@ The data dictionary says a database trigger updates the flight status and OOOI t
 | RN-11: Passenger isolation | The path `pasajero → reserva_pasajero → itinerario → detalle_reserva` can support authorization checks in the API. |
 
 :::note[Level of Detail]
-This page summarizes the purpose, relationships, and main rules of the tables. For every field, SQL type, and table constraint, use the team's source file `diccionario_datos_vueladata.md` and the related `schema_postgresql.sql` file.
+This page summarizes the purpose, relationships, and main rules of the tables. For every field, SQL type, and table constraint, use the [detailed dictionary](https://github.com/vueladata/vueladata-database/blob/master/website/docs/database/diccionario_datos_vueladata.md) and the [SQL definition](https://github.com/vueladata/vueladata-database/blob/master/schema_postgresql.sql).
 :::

@@ -10,23 +10,23 @@ tags: [postgresql, seed, synthetic-data, data-quality]
 
 ## Purpose
 
-The Seed loads test data into the VuelaData operational database. According to the module README, it uses a fixed random seed to support repeatable results, can be run more than once without duplicating records, and can inject operational data quality defects with a configurable probability.
+The Seed loads test data into the VuelaData operational database. It seeds the pseudo-random generators with 42 by default and inserts batches with `ON CONFLICT DO NOTHING` for the configured unique keys. It can generate missing OOOI events, invalid cause codes, and incorrect arrival times for flights crossing midnight.
 
 ## Requirements
 
-- Python 3.9 or newer, according to the Seed README.
+- Python and a running PostgreSQL instance.
 - The `airlines.csv` and `airports.csv` files in the same directory as `seed.py`.
-- A running PostgreSQL instance.
-- The operational schema created first by running `schema_postgresql.sql`.
+- A development database named `vueladata` with the operational schema.
 - The `psycopg2-binary`, `python-dotenv`, `pandas`, and `faker` dependencies.
 
-## Install Dependencies
+## Initialize the database
+
+Run these commands from the root of [vueladata-database](https://github.com/vueladata/vueladata-database) after creating the development database.
 
 ```bash
-pip install psycopg2-binary python-dotenv pandas faker
+psql -U postgres -d vueladata -v ON_ERROR_STOP=1 -f schema_postgresql.sql
+python -m pip install -r requirements.txt
 ```
-
-If the repository includes `requirements.txt`, the README says you can also install the dependencies listed in that file.
 
 ## Environment Variables
 
@@ -50,7 +50,7 @@ Do not upload real credentials to the repository. Use local values and limit acc
 python seed.py
 ```
 
-The README says the default mode (`small`) creates a small batch for quick development, with 10 flights and 50 passengers.
+The default mode (`small`) prepares 10 flights and 50 passengers.
 
 ### Full Batch With Synthetic Defects
 
@@ -65,20 +65,20 @@ The documented `--volumen` values are:
 | `--volumen` | `small`, `full` | `small` is the default. `full` is intended for volume testing. |
 | `--tasa-defectos` | Decimal from `0.0` to `1.0` | Probability of injecting defects. The default is `0.0`. |
 
-The `full` mode is described as 1,000 flights and 5,000 passengers. These defects are synthetic and are used to test data quality controls; they do not necessarily represent real incidents.
+The `full` mode prepares 1,000 flights and 5,000 passengers. These defects are synthetic and are used to test data quality controls; they do not necessarily represent real incidents.
 
 ## Reset the Generated Data
 
-The README suggests running the following SQL on the `vueladata` database to remove records from the listed tables and dependent tables reached by `CASCADE`:
+This example resets a disposable development database by truncating the listed tables and dependent tables reached by `CASCADE`.
 
 ```sql
 TRUNCATE TABLE
-    pais,
-    aerolinea,
-    estado_vuelo,
-    causa,
-    pasajero,
-    reserva
+    vueladata.pais,
+    vueladata.aerolinea,
+    vueladata.estado_vuelo,
+    vueladata.causa,
+    vueladata.pasajero,
+    vueladata.reserva
 RESTART IDENTITY CASCADE;
 ```
 
@@ -123,9 +123,3 @@ WHERE e_in.codigo_evento = 'IN'
 ```
 
 These queries look for examples of defects mentioned in the README. The number of results depends on the generated data and the configured defect rate.
-
-## Notes
-
-- Run the Seed after creating the operational schema.
-- Make sure the CSV files are in the location expected by the script.
-- The README describes a fixed seed and idempotent behavior. If the code changes, check that the current version still supports these features.
