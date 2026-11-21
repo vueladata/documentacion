@@ -1,28 +1,28 @@
 ---
 id: stream-f4-simulator
-title: Simulador F4 de eventos OOOI
-sidebar_label: Simulador F4
+title: F4 OOOI event simulator
+sidebar_label: F4 simulator
 sidebar_position: 5
 tags: [stream, rabbitmq, oooi, python, docker, fargate, chaos-engineering]
 ---
 
-F4 genera eventos de vuelo sintéticos para probar la ingesta y la validación de datos. El ciclo OOOI distingue cuatro hitos de un vuelo.
+F4 generates synthetic flight events to test ingestion and data validation. The OOOI cycle tracks four flight milestones.
 
-| Código | Hito |
+| Code | Milestone |
 | --- | --- |
-| `OUT` | Salida de la puerta. |
-| `OFF` | Despegue. |
-| `ON` | Aterrizaje. |
-| `IN` | Llegada a la puerta. |
+| `OUT` | Gate departure. |
+| `OFF` | Takeoff. |
+| `ON` | Landing. |
+| `IN` | Gate arrival. |
 
-Cada mensaje contiene `id_externo_evento` (UUID), `id_vuelo`, `numero_vuelo`, `codigo_evento`, `fecha_hora_evento_utc` (ISO 8601) y `codigo_causa_original` (nullable). El generador introduce defectos con una probabilidad del 10 % por vuelo. Puede omitir `ON`, emitir la causa `ERROR_99` o registrar un `IN` anterior a `OUT`.
+Each message contains `id_externo_evento` (UUID), `id_vuelo`, `numero_vuelo`, `codigo_evento`, `fecha_hora_evento_utc` (ISO 8601), and nullable `codigo_causa_original`. The generator injects defects with a probability of 10% per flight. It can omit `ON`, emit cause code `ERROR_99`, or record `IN` before `OUT`.
 
-## Código publicado
+## Published code {/* #código-publicado */}
 
-El productor ejecuta un lote finito de vuelos generados en memoria. Usa `TOTAL_VUELOS` para el tamaño del lote y `STREAM_DELAY_SECONDS` para la espera entre publicaciones. Publica en la cola durable `QUEUE_NAME` mediante el exchange predeterminado de RabbitMQ. El valor predeterminado es `eventos_oooi_queue`. Para usar un consumidor de otra cola se debe configurar un enrutamiento compatible. [Ejecución local y consumidor de prueba](https://github.com/vueladata/vueladata-stream).
+The producer runs a finite batch of flights generated in memory. `TOTAL_VUELOS` sets the batch size and `STREAM_DELAY_SECONDS` sets the interval between publications. The producer publishes to the durable `QUEUE_NAME` queue via RabbitMQ's default exchange. The default queue is `eventos_oooi_queue`. Consumers on another queue require compatible routing. [Local setup and test consumer](https://github.com/vueladata/vueladata-stream).
 
-## Configuración probada en AWS
+## Configuration tested on AWS {/* #configuración-probada-en-aws */}
 
-La revisión probada del servicio ECS consultó una agenda de vuelos existentes de RDS en modo lectura. Publicó con confirmación del broker en el exchange fanout `vueladata.oooi` conectado a `q.rds_writer` y `q.lake_writer`. Identificó los mensajes con `simulated=true`, `source=stream_f4` y `event_type=oooi`. El código publicado conserva el modo de cola directa descrito arriba.
+The tested ECS revision read an existing flight schedule from RDS. It used publisher confirms and published to the `vueladata.oooi` fanout exchange bound to `q.rds_writer` and `q.lake_writer`. Messages included `simulated=true`, `source=stream_f4`, and `event_type=oooi`. The published code uses the direct queue described above.
 
-Para comprobar una entrega completa, busca el mismo UUID en CloudWatch, en `vueladata.evento_operacional` y en S3 bajo `bronze/events/oooi/`. [Estado de ECS y acceso de RabbitMQ en AWS](../orchestration/accesos-aws.md).
+To verify delivery end to end, look up the same UUID in CloudWatch, in `vueladata.evento_operacional`, and in S3 under `bronze/events/oooi/`. [ECS status and AWS RabbitMQ access](../orchestration/accesos-aws.md).

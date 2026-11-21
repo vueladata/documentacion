@@ -1,16 +1,16 @@
 ---
-title: 005 Red de AWS y gestión de secretos
+title: 005 AWS networking and secrets management
 sidebar_position: 5
 ---
 
-## Contexto
+## Context {/* #contexto */}
 
-Los contenedores y la base operativa requieren acceso administrativo, salida para dependencias y resolución privada del broker. Se evaluaron acceso directo, servicios administrados de conectividad y una configuración de menor costo para desarrollo.
+Containers and the operational database require administrative access, outbound access to dependencies, and private broker resolution. The team evaluated direct access, managed connectivity, and a lower-cost development setup.
 
-## Decisión
+## Decision {/* #decisión */}
 
-El diseño separa las subredes de entrada, cómputo y datos. Usa ALB para las interfaces, bastión EC2 para administración de RDS, instancia NAT para salida, Cloud Map para DNS privado y Parameter Store para secretos referenciados por ECS. La conectividad a RDS se controla mediante sus grupos de seguridad.
+The design separates ingress, compute, and data subnets. It uses an ALB for interfaces, an EC2 bastion for RDS administration, a NAT instance for egress, Cloud Map for private DNS, and Parameter Store for secrets referenced by ECS. RDS security groups control connectivity.
 
-## Consecuencias
+## Consequences {/* #consecuencias */}
 
-El equipo administra bastión y NAT, y requiere una ruta autorizada para acceder a RDS. La topología descrita es la decisión de diseño. Consulta la [configuración observada en AWS](../orchestration/accesos-aws.md) para el entorno de desarrollo.
+The team operates the bastion and NAT instance and needs an authorized route to access RDS. See the [observed AWS configuration](../orchestration/accesos-aws.md) for the development environment.

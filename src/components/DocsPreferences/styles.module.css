@@ -1,0 +1,58 @@
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem max(0.75rem, env(safe-area-inset-bottom));
+  border-top: 1px solid #1a3c6b;
+  background-color: var(--vueladata-blue-darker);
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.375rem;
+  border: 1px solid #3b679b;
+  border-radius: 6px;
+  background-color: var(--vueladata-blue-surface);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.control svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--vueladata-blue-accent);
+}
+
+.control:hover {
+  border-color: #72b8ff;
+  background-color: var(--vueladata-blue-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+.control:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.currentLanguage {
+  color: #fff;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.separator {
+  padding-inline: 0.25em;
+  color: #9fb7d3;
+}

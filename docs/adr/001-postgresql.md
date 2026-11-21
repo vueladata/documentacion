@@ -1,16 +1,16 @@
 ---
-title: 001 Base operativa en PostgreSQL
+title: 001 Operational database on PostgreSQL
 sidebar_position: 1
 ---
 
-## Contexto
+## Context {/* #contexto */}
 
-Vuelos, reservas, incidencias, compensaciones y pagos requieren consistencia relacional y trazabilidad. Airflow también requiere un almacén de metadatos. Se consideraron PostgreSQL autogestionado en EC2, DynamoDB y dos instancias RDS.
+Flights, bookings, disruptions, compensation, and payments require relational consistency and traceability. Airflow also needs a metadata store. The team considered self-managed PostgreSQL on EC2, DynamoDB, and two RDS instances.
 
-## Decisión
+## Decision {/* #decisión */}
 
-Se eligió Amazon RDS for PostgreSQL con separación lógica entre la base operativa `vueladata` y `airflow_db`. SQLAlchemy mapea el esquema operativo y PostgreSQL impone las restricciones de unicidad de RN-09.
+Use Amazon RDS for PostgreSQL with separate logical databases for operations (`vueladata`) and Airflow metadata (`airflow_db`). SQLAlchemy maps the operational schema, and PostgreSQL enforces the unique constraints required by RN-09.
 
-## Consecuencias
+## Consequences {/* #consecuencias */}
 
-RDS administra el motor y las copias de seguridad. Compartir instancia reduce infraestructura y acopla la disponibilidad de operación y orquestación. El ADR original contemplaba PostgreSQL 16 y Multi-AZ para producción. La versión del RDS de desarrollo se registra en la [ficha del entorno](../orchestration/accesos-aws.md). El esquema usado para desarrollo está en [vueladata-database](https://github.com/vueladata/vueladata-database).
+RDS manages the engine and backups. Sharing an instance reduces infrastructure and couples the availability of operations and orchestration. The original ADR considered PostgreSQL 16 and Multi-AZ for production. The [AWS environment page](../orchestration/accesos-aws.md) records the development RDS version. [Development schema repository](https://github.com/vueladata/vueladata-database).

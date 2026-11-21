@@ -1,0 +1,20 @@
+{
+  "docs.preferences.light": {
+    "message": "Claro"
+  },
+  "docs.preferences.dark": {
+    "message": "Oscuro"
+  },
+  "docs.preferences.useLight": {
+    "message": "Cambiar al tema claro"
+  },
+  "docs.preferences.useDark": {
+    "message": "Cambiar al tema oscuro"
+  },
+  "docs.preferences.switchLanguage": {
+    "message": "Leer esta página en inglés"
+  },
+  "docs.footer.description": {
+    "message": "Prototipo de experiencia de viaje"
+  }
+}

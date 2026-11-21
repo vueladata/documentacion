@@ -11,11 +11,11 @@ sidebar_position: 2
 
 This section contains documents about the operational database structure and the initial loading of test data. The F7 API and the flight schedule generator are documented in separate sections, even though they may use or produce related data.
 
-## Documents
+## Documents {/* #documents */}
 
 - [Seed Setup](./setup-seed.md): requirements, environment variables, execution, and checks for synthetic data defects.
 - [Data Dictionary](./diccionario-datos.md): tables, fields, relationships, and integrity rules described for the `vueladata` schema.
 
-## Schema Scope
+## Schema Scope {/* #schema-scope */}
 
 The data dictionary describes the operational `vueladata` schema. Airflow stores its metadata in `airflow_db`. Spark processes the F1 historical dataset in the analytical Data Lake. [Database repository](https://github.com/vueladata/vueladata-database). [PostgreSQL ADR](../adr/001-postgresql.md).

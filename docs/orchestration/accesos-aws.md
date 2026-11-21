@@ -1,24 +1,24 @@
 ---
-title: Accesos y estado de AWS
+title: AWS endpoints and deployment status
 sidebar_position: 1
 ---
 
-Verificación de solo lectura del **20 de noviembre de 2026** en `us-east-1`. El balanceador público `vueladata-alb` sigue activo. La API, Airflow, los tres workers y el productor tienen cero tareas deseadas y en ejecución. RabbitMQ tiene una tarea en ejecución y el balanceador reporta su destino como `unhealthy`. RDS está detenido.
+Read-only verification on **November 20, 2026** in `us-east-1`. The public `vueladata-alb` load balancer was active. The API, Airflow, the three workers, and the producer had zero desired and running tasks. RabbitMQ had one running task, and the load balancer marked its target as `unhealthy`. RDS was stopped.
 
-## Endpoints
+## Endpoints {/* #endpoints */}
 
-| Servicio | URL del despliegue | Estado observado |
+| Service | Deployment URL | Observed status |
 | --- | --- | --- |
-| FastAPI | [Swagger](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/docs), [OpenAPI JSON](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/openapi.json), [Health](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/health), [Health DB](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/health/db) | Listener HTTP en 80. Sin destinos de API. |
-| Airflow | [Interfaz de Airflow](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com:8080/) | Listener HTTP en 8080. Sin destinos de Airflow. |
-| RabbitMQ | [Consola de administración](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com:15672/) | Listener HTTP en 15672. Destino sin salud. |
-| RabbitMQ AMQP | `rabbitmq.vueladata.local:5672` | Nombre privado de Cloud Map para clientes dentro de la VPC. |
-| PostgreSQL | Instancia `vueladata-postgres-dev` | Detenida y en PostgreSQL 18.3. El atributo `PubliclyAccessible` está habilitado, y la regla observada para 5432 autoriza por grupo de seguridad. |
+| FastAPI | [Swagger](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/docs), [OpenAPI JSON](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/openapi.json), [Health](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/health), [Health DB](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com/health/db) | HTTP listener on port 80. No API targets. |
+| Airflow | [Airflow interface](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com:8080/) | HTTP listener on port 8080. No Airflow targets. |
+| RabbitMQ | [Management console](http://vueladata-alb-1578856342.us-east-1.elb.amazonaws.com:15672/) | HTTP listener on port 15672. Unhealthy target. |
+| RabbitMQ AMQP | `rabbitmq.vueladata.local:5672` | Private Cloud Map name for clients within the VPC. |
+| PostgreSQL | Instance `vueladata-postgres-dev` | Stopped, running PostgreSQL 18.3 when active. `PubliclyAccessible` is enabled, and the observed rule for port 5432 grants access by security group. |
 
-Los listeners identificados usan HTTP. Los enlaces permiten identificar las rutas desplegadas. Para consultar recursos internos, usa el acceso autorizado de AWS.
+The listeners use HTTP. These links identify the deployed routes. Use authorized AWS access to inspect internal resources.
 
-## Ingesta y datos
+## Ingestion and data {/* #ingesta-y-datos */}
 
-Las reglas EventBridge `opensky-schedule` y `openmeteo-schedule` seguían habilitadas. Estar habilitadas indica que pueden invocar sus funciones. La confirmación de entrega depende del broker y de los dos consumidores. Con los consumidores detenidos, esta revisión no certifica persistencia de eventos nuevos en RDS o S3.
+The `opensky-schedule` and `openmeteo-schedule` EventBridge rules were enabled and could invoke their functions. Confirmed delivery depends on the broker and both consumers. With the consumers stopped, the review could not verify persistence of new events in RDS or S3.
 
-El catálogo `vueladata_gold_db` registra 16 tablas: siete conjuntos para Power BI y nueve tablas del modelo estrella. La consulta fue de metadatos de Glue. Sigue el [contrato Gold y la guía de Athena](./index.md#qué-publica-spark) al consultar o registrar datos.
+Glue metadata showed 16 tables in `vueladata_gold_db`: seven Power BI datasets and nine star-schema tables. Follow the [Gold contract and Athena guide](./index.md#qué-publica-spark) when querying or registering data.

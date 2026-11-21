@@ -392,3 +392,128 @@ html:not(.plugin-docs) .navbar {
 .footer__copyright {
   color: #94a3b8 !important;
 }
+
+/* The light palette applies to technical documentation only. */
+html.plugin-docs[data-theme='light'] {
+  --ifm-background-color: #e5f2e8;
+  --ifm-background-surface-color: #f3faf4;
+  --ifm-font-color-base: #182e3f;
+  --ifm-heading-color: #081b34;
+  --ifm-link-color: #064da4;
+  --ifm-link-hover-color: #08244a;
+  --ifm-toc-link-color: #456054;
+  --ifm-toc-link-active-color: #064da4;
+  --ifm-table-border-color: #b2ccbe;
+  --ifm-table-stripe-background: #e8f4eb;
+  --ifm-code-background: #d8ebdf;
+  --ifm-code-color: #184275;
+  --ifm-hr-border-color: #b2ccbe;
+  --ifm-color-emphasis-300: #b2ccbe;
+}
+
+.plugin-docs[data-theme='light'] .main-wrapper {
+  background-color: var(--ifm-background-color);
+}
+
+.plugin-docs[data-theme='light'] :is(.markdown, .markdown p, .markdown li, .alert) {
+  color: var(--ifm-font-color-base) !important;
+}
+
+.plugin-docs[data-theme='light'] :is(.markdown :is(h1, h2, h3, h4, h5, h6, strong), .alert :is(strong, p, li), .pagination-nav__label) {
+  color: var(--ifm-heading-color) !important;
+}
+
+.plugin-docs[data-theme='light'] .markdown :is(h1, h2) {
+  border-color: var(--ifm-hr-border-color);
+}
+
+.plugin-docs[data-theme='light'] .markdown a {
+  color: var(--ifm-link-color) !important;
+}
+
+.plugin-docs[data-theme='light'] .markdown a:hover {
+  color: var(--ifm-link-hover-color) !important;
+}
+
+.plugin-docs[data-theme='light'] :is(.markdown table, .theme-code-block, .pagination-nav__link, .alert) {
+  background-color: var(--ifm-background-surface-color) !important;
+  border-color: var(--ifm-table-border-color) !important;
+  box-shadow: 0 4px 15px rgb(13 59 38 / 10%);
+}
+
+.plugin-docs[data-theme='light'] .markdown table td {
+  color: var(--ifm-font-color-base) !important;
+  border-color: var(--ifm-table-border-color) !important;
+}
+
+.plugin-docs[data-theme='light'] .markdown table tr:nth-child(2n) {
+  background-color: var(--ifm-table-stripe-background) !important;
+}
+
+.plugin-docs[data-theme='light'] .markdown table tr:hover {
+  background-color: #d7ecdf !important;
+}
+
+.plugin-docs[data-theme='light'] .markdown :not(pre) > code {
+  background-color: var(--ifm-code-background) !important;
+  color: var(--ifm-code-color) !important;
+  border-color: var(--ifm-table-border-color) !important;
+}
+
+.plugin-docs[data-theme='light'] .prism-code {
+  background-color: var(--ifm-background-surface-color) !important;
+}
+
+.plugin-docs[data-theme='light'] :is(.table-of-contents__link, .breadcrumbs__link, .pagination-nav__sublabel) {
+  color: var(--ifm-toc-link-color) !important;
+}
+
+.plugin-docs[data-theme='light'] :is(.table-of-contents__link:hover, .table-of-contents__link--active, .breadcrumbs__link:hover) {
+  color: var(--ifm-link-color) !important;
+}
+
+.plugin-docs[data-theme='light'] .pagination-nav__link:hover {
+  background-color: #d7ecdf !important;
+  border-color: var(--vueladata-blue-primary) !important;
+}
+
+.plugin-docs[data-theme='light'] .alert--info {
+  border-left-color: #3b82f6 !important;
+}
+
+.plugin-docs[data-theme='light'] .alert--success {
+  border-left-color: #10b981 !important;
+}
+
+.plugin-docs[data-theme='light'] .alert--warning {
+  border-left-color: #b45309 !important;
+}
+
+.plugin-docs[data-theme='light'] .alert--danger {
+  border-left-color: #dc2626 !important;
+}
+
+.plugin-docs .navbar :is(.navbar__toggle, .navbar-sidebar__close, .navbar-sidebar__back) {
+  color: #fff;
+}
+
+.plugin-docs .navbar-sidebar__close svg g {
+  stroke: currentColor;
+}
+
+/* Keep the passenger portal's native controls independent of docs preferences. */
+html:not(.plugin-docs) {
+  --ifm-color-scheme: dark;
+}
+
+@media (max-width: 996px) {
+  .plugin-docs .markdown table {
+    display: block !important;
+    max-width: 100%;
+    overflow-x: auto !important;
+  }
+
+  .plugin-docs .markdown :not(pre) > code {
+    overflow-wrap: anywhere;
+  }
+}

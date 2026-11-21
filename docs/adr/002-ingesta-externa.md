@@ -1,16 +1,16 @@
 ---
-title: 002 Ingesta de OpenSky y Open-Meteo
+title: 002 OpenSky and Open-Meteo ingestion
 sidebar_position: 2
 ---
 
-## Contexto
+## Context {/* #contexto */}
 
-Las posiciones y observaciones meteorológicas alimentan tanto la operación como el Data Lake. Las fuentes tienen cuotas y se consultan periódicamente. Se consideraron contenedores dedicados al polling y una ingesta Lambda con una sola salida a S3.
+Aircraft positions and weather observations feed the operational database and the data lake. Both sources have quotas and are polled periodically. The team considered dedicated polling containers and Lambda ingestion that writes only to S3.
 
-## Decisión
+## Decision {/* #decisión */}
 
-Se eligieron dos Lambdas en la VPC, programadas desde EventBridge, con publicación confirmada en el exchange fanout `vueladata.external` y dos consumidores independientes. RabbitMQ se descubre mediante Cloud Map DNS privado. Cuando falla la conexión AMQP y se confirma que el broker está en cero, la Lambda guarda el lote en S3 para su republicación.
+Use two Lambda functions in the VPC, scheduled through EventBridge, with publisher confirms on the `vueladata.external` fanout exchange and two independent consumers. Cloud Map provides private DNS for RabbitMQ. When the AMQP connection fails and the broker is confirmed to have scaled to zero, the function stores the batch in S3 for replay.
 
-## Consecuencias
+## Consequences {/* #consecuencias */}
 
-La entrega es al menos una vez. El backlog se procesa por lotes y RDS puede quedar rezagado. Worker RDS requiere un catálogo ICAO24 o IATA para resolver cada evento. Los casos sin referencia quedan en `q.rds_unresolved`. [Contrato de transporte y replay](https://github.com/vueladata/vueladata-orchestration/tree/main/infrastructure/aws/lambdas).
+Delivery is at least once. The backlog is processed in batches, so RDS can lag. Worker RDS needs ICAO24 or IATA catalog entries to resolve events. Unmatched records go to `q.rds_unresolved`. [Transport and replay contract](https://github.com/vueladata/vueladata-orchestration/tree/main/infrastructure/aws/lambdas).

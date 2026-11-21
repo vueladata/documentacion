@@ -1,36 +1,36 @@
 ---
 id: api-f7
-title: API de pasajeros, compensaciones y pagos
-sidebar_label: API y workers
+title: Passenger API, compensation, and payments
+sidebar_label: API and workers
 sidebar_position: 4
 tags: [fastapi, sqlalchemy, postgresql, docker, rest-api, rabbitmq, celery, workers]
 ---
 
-FastAPI ofrece consultas a pasajeros y las operaciones de F7 para compensaciones y pagos simulados. El backend y los tres workers comparten una imagen de contenedor. [Repositorio, instalación y pruebas](https://github.com/vueladata/vueladata-api). [URLs de AWS y estado del despliegue](../orchestration/accesos-aws.md#endpoints).
+FastAPI provides passenger queries and F7 operations for simulated compensation and payments. The backend and its three workers share a container image. [Repository, setup, and tests](https://github.com/vueladata/vueladata-api). [AWS endpoints and deployment status](../orchestration/accesos-aws.md#endpoints).
 
-## API REST
+## REST API {/* #api-rest */}
 
-| Recurso | Operación |
+| Resource | Operation |
 | --- | --- |
-| `GET /pasajeros/{id_pasajero}` | Perfil del pasajero. |
-| `GET /pasajeros/{id_pasajero}/itinerarios` | Reservas propias, vuelos, evaluaciones de conexión y reubicaciones. `/pasajeros/{id_pasajero}/reservas` es un alias. |
-| `GET /pasajeros/{id_pasajero}/compensaciones` | Compensaciones, pagos y notificaciones propios. |
-| `GET /reservas/{codigo_reserva}/estado` | Estado consolidado de una reserva del pasajero. |
-| `/causas/`, `/reglas-compensacion/`, `/compensaciones/` | Alta, consulta, actualización parcial y eliminación por recurso. |
-| `/pagos/`, `/pagos/idempotencia/{clave}` | Solicitudes de desembolso y consulta por clave de idempotencia. |
-| `/eventos-pago/` | Consulta y registro de confirmaciones F7. |
-| `GET /health`, `GET /health/db` | Salud de la API y conectividad a PostgreSQL, respectivamente. |
+| `GET /pasajeros/{id_pasajero}` | Passenger profile. |
+| `GET /pasajeros/{id_pasajero}/itinerarios` | The passenger's bookings, flights, connection assessments, and rebooking options. `/pasajeros/{id_pasajero}/reservas` is an alias. |
+| `GET /pasajeros/{id_pasajero}/compensaciones` | The passenger's compensation, payments, and notifications. |
+| `GET /reservas/{codigo_reserva}/estado` | Consolidated status of one of the passenger's bookings. |
+| `/causas/`, `/reglas-compensacion/`, `/compensaciones/` | Create, read, partially update, and delete each resource. |
+| `/pagos/`, `/pagos/idempotencia/{clave}` | Disbursement requests and lookup by idempotency key. |
+| `/eventos-pago/` | Read and record F7 payment confirmations. |
+| `GET /health`, `GET /health/db` | API health and PostgreSQL connectivity, respectively. |
 
-Las rutas de pasajeros aplican RN-11 comparando la cabecera `X-Pasajero-Id` con el pasajero del recurso. Responden `401` si falta, `403` si la identidad declarada no corresponde y `404` si el recurso solicitado no existe. El prototipo acepta la identidad declarada por el cliente. Para exponer estas consultas con datos reales se requiere una capa de autenticación que verifique la identidad.
+The passenger routes enforce RN-11 by comparing the `X-Pasajero-Id` header with the passenger associated with the resource. They return `401` for a missing header, `403` for an identity mismatch, and `404` when the requested resource does not exist. The prototype accepts an identity supplied by the client. Queries against real passenger data require an authentication layer that verifies that identity.
 
-La clave de idempotencia de `pago` y el identificador externo de `evento_pago` respaldan RN-09. El esquema SQL impone la unicidad de la compensación por segmento y del pago por compensación. [Diccionario de datos](../base-datos-transaccional-seed/diccionario-datos.md).
+The `pago` idempotency key and the external `evento_pago` ID support RN-09. SQL constraints enforce one compensation per segment and one payment per compensation. [Data dictionary](../base-datos-transaccional-seed/diccionario-datos.md).
 
-## Consumidores
+## Consumers {/* #consumidores */}
 
-| Proceso | Entrada y salida |
+| Process | Input and output |
 | --- | --- |
-| `worker_rds` | Consume `q.rds_writer`. Persiste OOOI, resuelve OpenSky por ICAO24 y clima por IATA. Publica en `q.rds_unresolved` los eventos de fuentes externas que carecen de catálogo. |
-| `worker_lake` | Consume `q.lake_writer` y guarda datos crudos en Bronze. Para F2 y F3 escribe NDJSON en `bronze/events/opensky/` y `bronze/events/clima/`. El fallback a disco es opcional para desarrollo. |
-| `worker_notificaciones` | Consume `q.notificaciones_email` del exchange topic `vueladata.notificaciones`. Envía correo HTML por SMTP y registra su estado en PostgreSQL. |
+| `worker_rds` | Consumes `q.rds_writer`. Persists OOOI events, resolves OpenSky records by ICAO24, and matches weather records by IATA code. Sends external events with missing catalog entries to `q.rds_unresolved`. |
+| `worker_lake` | Consumes `q.lake_writer` and writes raw data to Bronze. Writes F2 and F3 as NDJSON to `bronze/events/opensky/` and `bronze/events/clima/`. A local disk fallback is optional for development. |
+| `worker_notificaciones` | Consumes `q.notificaciones_email` from the `vueladata.notificaciones` topic exchange. Sends HTML emails via SMTP and records their status in PostgreSQL. |
 
-`worker_rds` evalúa conexiones y reubicaciones para pasajeros afectados al procesar eventos operacionales. El exchange de notificaciones usa las claves `vuelo.cancelado`, `vuelo.retrasado`, `conexion.en_riesgo` e `itinerario.cambiado`. Para pruebas SMTP usa `EMAIL_DESTINO_PRUEBAS` y suministra las credenciales desde el entorno. [ADR de notificaciones](../adr/006-notificaciones.md).
+`worker_rds` assesses connections and rebooking options for passengers affected by operational events. The notifications exchange uses routing keys `vuelo.cancelado`, `vuelo.retrasado`, `conexion.en_riesgo`, and `itinerario.cambiado`. Use `EMAIL_DESTINO_PRUEBAS` for SMTP tests and provide credentials through the environment. [Notifications ADR](../adr/006-notificaciones.md).

@@ -14,7 +14,8 @@ const config = {
   organizationName: 'vueladata',
   projectName: 'documentacion',
   onBrokenLinks: 'throw',
-  i18n: {defaultLocale: 'es', locales: ['es']},
+  i18n: {defaultLocale: 'en', locales: ['en', 'es']},
+  storage: {namespace: 'vueladata'},
   presets: [
     ['classic', {
       docs: {sidebarPath: './sidebars.js'},
@@ -24,23 +25,22 @@ const config = {
   ],
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
-    colorMode: {defaultMode: 'dark', disableSwitch: true},
+    colorMode: {defaultMode: 'dark'},
     navbar: {
       title: 'VuelaData',
       logo: {alt: 'VuelaData', src: 'img/vueladata-logo.png'},
       items: [
-        {type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'right', label: 'Documentación técnica'},
+        {type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'right', label: 'Technical documentation'},
       ],
     },
     footer: {
       style: 'dark',
-      links: [{title: 'Proyecto', items: [
-        {label: 'Inicio', to: '/'},
-        {label: 'Documentación técnica', to: '/docs'},
+      links: [{title: 'Project', items: [
+        {label: 'Home', to: '/'},
+        {label: 'Technical documentation', to: '/docs'},
       ]}],
-      copyright: `VuelaData · ${new Date().getFullYear()} · Prototipo de experiencia de viaje`,
     },
-    prism: {theme: prismThemes.dracula, darkTheme: prismThemes.dracula},
+    prism: {theme: prismThemes.github, darkTheme: prismThemes.dracula},
   },
 };
 export default config;

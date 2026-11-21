@@ -1,0 +1,11 @@
+{
+  "link.title.Project": {
+    "message": "Proyecto"
+  },
+  "link.item.label.Home": {
+    "message": "Inicio"
+  },
+  "link.item.label.Technical documentation": {
+    "message": "Documentación técnica"
+  }
+}

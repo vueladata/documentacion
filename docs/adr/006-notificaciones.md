@@ -1,16 +1,16 @@
 ---
-title: 006 Notificaciones asíncronas por correo
+title: 006 Asynchronous email notifications
 sidebar_position: 6
 ---
 
-## Contexto
+## Context {/* #contexto */}
 
-Los retrasos, cancelaciones, conexiones en riesgo y reubicaciones requieren avisos trazables. Se consideró enviar correo dentro de la transacción o procesar el envío en un servicio independiente.
+Delays, cancellations, at-risk connections, and rebooking require traceable notifications. The team considered sending email within the transaction or processing it in a separate service.
 
-## Decisión
+## Decision {/* #decisión */}
 
-Worker RDS publica avisos en el exchange topic `vueladata.notificaciones`. El consumidor `worker_notificaciones` lee `q.notificaciones_email`, envía correo HTML por SMTP y registra `PENDIENTE`, `ENVIADA` o `FALLIDA` en PostgreSQL.
+Worker RDS publishes notices to the `vueladata.notificaciones` topic exchange. The `worker_notificaciones` consumer reads `q.notificaciones_email`, sends HTML email via SMTP, and records `PENDIENTE`, `ENVIADA`, or `FALLIDA` in PostgreSQL.
 
-## Consecuencias
+## Consequences {/* #consecuencias */}
 
-SMTP queda fuera de la transacción operacional. Los reintentos y el estado del mensaje permiten seguir los fallos. En desarrollo, `EMAIL_DESTINO_PRUEBAS` redirige los mensajes a un buzón controlado. [Flujo de notificaciones y API](../api-f7/index.md).
+SMTP runs outside the operational transaction. Retries and message status help track delivery failures. In development, `EMAIL_DESTINO_PRUEBAS` reroutes messages to a controlled mailbox. [Notifications and API](../api-f7/index.md).

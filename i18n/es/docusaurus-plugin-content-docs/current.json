@@ -1,0 +1,20 @@
+{
+  "sidebar.tutorialSidebar.category.Architecture decisions": {
+    "message": "Decisiones de arquitectura"
+  },
+  "sidebar.tutorialSidebar.category.Passenger API and F7": {
+    "message": "API de pasajeros y F7"
+  },
+  "sidebar.tutorialSidebar.category.Transactional Database and Seed": {
+    "message": "Base transaccional y datos de prueba"
+  },
+  "sidebar.tutorialSidebar.category.Flight Schedule and Fleet Rotation": {
+    "message": "Itinerario y rotación de flota"
+  },
+  "sidebar.tutorialSidebar.category.Orchestration and deployment": {
+    "message": "Orquestación y despliegue"
+  },
+  "sidebar.tutorialSidebar.category.F4 simulator": {
+    "message": "Simulador F4"
+  }
+}

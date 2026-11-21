@@ -1,16 +1,16 @@
 ---
-title: 003 Capa analítica en S3, Glue y Athena
+title: 003 Analytics with S3, Glue, and Athena
 sidebar_position: 3
 ---
 
-## Contexto
+## Context {/* #contexto */}
 
-Power BI necesita consultar vuelos históricos y diarios sin trasladar esa carga a la base operativa. Se consideraron Redshift aprovisionado y consultas directas a PostgreSQL.
+Power BI needs to query historical and daily flights without placing that load on the operational database. The team considered provisioned Redshift and direct PostgreSQL queries.
 
-## Decisión
+## Decision {/* #decisión */}
 
-Spark escribe Parquet en S3 bajo la arquitectura Medallion. Glue Data Catalog expone los conjuntos Gold a Athena para las consultas de Power BI y los controles CT-10. Se versionan siete conjuntos para Power BI y nueve tablas del modelo estrella.
+Spark writes Parquet to S3 in a medallion architecture. Glue Data Catalog exposes Gold datasets to Athena for Power BI queries and CT-10 checks. Seven Power BI datasets and nine star-schema tables are versioned.
 
-## Consecuencias
+## Consequences {/* #consecuencias */}
 
-Las consultas analíticas quedan desacopladas del servicio transaccional. El costo de Athena depende del volumen escaneado. Los cambios de esquema y particiones deben reflejarse en el catálogo. [Contrato Gold y consultas CT-10](../orchestration/index.md#qué-publica-spark).
+Analytical queries run independently of the transactional service. Athena costs depend on the amount of data scanned. Schema and partition changes must be reflected in the catalog. [Gold contract and CT-10 queries](../orchestration/index.md#qué-publica-spark).

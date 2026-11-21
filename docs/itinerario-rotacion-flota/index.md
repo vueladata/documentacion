@@ -8,13 +8,13 @@ tags: [python, pandas, numpy, csv, synthetic-data]
 
 # Flight Schedule and Fleet Rotation Generator
 
-## Purpose
+## Purpose {/* #purpose */}
 
 This generator creates synthetic data for the VuelaData flight schedule and fleet rotation module. It uses an airport catalog to calculate distances and estimated flight times, creates fictional aircraft registrations, and assigns aircraft to flights in a weekly schedule.
 
 The data is for simulation and testing. It is not a real commercial flight schedule.
 
-## Technologies
+## Technologies {/* #technologies */}
 
 - Python 3.13 or newer.
 - Pandas to load, clean, transform, and export tabular data.
@@ -22,7 +22,7 @@ The data is for simulation and testing. It is not a real commercial flight sched
 - CSV as the input and output format.
 - `uv` to manage dependencies and run the project.
 
-## Repository Structure
+## Repository Structure {/* #repository-structure */}
 
 ```text
 vueladata-csv/
@@ -41,7 +41,7 @@ vueladata-csv/
 
 `reference/airports.csv` is the generator input. `airlines.csv` is available as a reference, but the current generator does not need to use it directly. The script does not create an additional airport CSV.
 
-## Source: `airports.csv`
+## Source: `airports.csv` {/* #source-airportscsv */}
 
 The catalog contains fields such as:
 
@@ -57,7 +57,7 @@ The catalog contains fields such as:
 
 The process converts coordinates to numbers, removes records without valid coordinates, and removes duplicate IATA codes. The documented runs started with 322 records and produced 319 usable airports.
 
-## Generation Process
+## Generation Process {/* #generation-process */}
 
 1. **Load and clean data:** keep airports with an IATA code and valid coordinates. There is no maximum-distance filter.
 2. **Calculate distances:** use the Haversine formula to calculate geographic distances.
@@ -67,7 +67,7 @@ The process converts coordinates to numbers, removes records without valid coord
 6. **Create the weekly schedule:** aim to generate 2,700 flights over seven days and assign aircraft registrations to flights.
 7. **Validate the schedule:** check overlapping flights, route continuity, ground time, and the seven-day period.
 
-## Duration Formula
+## Duration Formula {/* #duration-formula */}
 
 ```text
 Estimated duration (minutes) =
@@ -89,9 +89,9 @@ The script uses the following settings.
 
 These values are for simulation. The estimated duration does not include every factor involved in a real flight operation.
 
-## Output Files
+## Output Files {/* #output-files */}
 
-### `synthetic_routes.csv`
+### `synthetic_routes.csv` {/* #synthetic_routescsv */}
 
 | Column | Description |
 |---|---|
@@ -100,13 +100,13 @@ These values are for simulation. The estimated duration does not include every f
 | `distance_km` | Estimated geographic distance. |
 | `estimated_duration_minutes` | Estimated travel time. |
 
-### `synthetic_fleet.csv`
+### `synthetic_fleet.csv` {/* #synthetic_fleetcsv */}
 
 | Column | Description |
 |---|---|
 | `aircraft_registration` | Fictional aircraft registration. |
 
-### `synthetic_weekly_itinerary.csv`
+### `synthetic_weekly_itinerary.csv` {/* #synthetic_weekly_itinerarycsv */}
 
 | Column | Description |
 |---|---|
@@ -120,7 +120,7 @@ These values are for simulation. The estimated duration does not include every f
 | `distance_km` | Estimated distance. |
 | `scheduled_duration_minutes` | Estimated duration in minutes. |
 
-## Install and Run
+## Install and Run {/* #install-and-run */}
 
 Open a terminal in the `fleet_itinerary` folder.
 
@@ -138,7 +138,7 @@ uv run --no-sync python generate_fleet_itinerary.py
 
 The script prints information about airports, routes, the fleet, and validation results. The CSV files are saved in `output/`.
 
-## Validation and Limits
+## Validation and Limits {/* #validation-and-limits */}
 
 The generator checks:
 
@@ -154,6 +154,6 @@ If the generator cannot create a valid schedule, it should report an error inste
 An airport being part of the network does not guarantee that it will appear in the weekly schedule. The number of flights that can be scheduled depends on distances, estimated durations, ground time, and aircraft availability.
 :::
 
-## Data Lake integration
+## Data Lake integration {/* #data-lake-integration */}
 
 The generator writes the three F6 CSV files locally. Spark reads them from `bronze/f6_rotacion/` once they are uploaded to S3. [ETL inputs](../orchestration/index.md#cómo-circulan-los-datos). [Generator repository](https://github.com/vueladata/vueladata-csv).

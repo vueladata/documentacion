@@ -8,11 +8,11 @@ tags: [postgresql, relational-model, data-dictionary]
 
 # VuelaData Data Dictionary
 
-## Scope
+## Scope {/* #scope */}
 
 This document describes the operational `vueladata` schema, defined in [schema_postgresql.sql](https://github.com/vueladata/vueladata-database/blob/master/schema_postgresql.sql).
 
-## Conventions
+## Conventions {/* #conventions */}
 
 | Convention | Meaning |
 |---|---|
@@ -23,7 +23,7 @@ This document describes the operational `vueladata` schema, defined in [schema_p
 | `unique` | The value or combination of values cannot be repeated. |
 | `nullable` | The field can be empty (`NULL`). |
 
-## 1. Geography, Fleet, and Operations
+## 1. Geography, Fleet, and Operations {/* #1-geography-fleet-and-operations */}
 
 | Table | Purpose | Main relationships or rules |
 |---|---|---|
@@ -39,7 +39,7 @@ This document describes the operational `vueladata` schema, defined in [schema_p
 | `posicion_aeronave` | Aircraft position data received from F2/OpenSky. | Foreign key to aircraft; `id_externo_posicion` is unique. |
 | `observacion_clima` | Weather observations from F3/Open-Meteo. | Foreign key to airport; the airport and observation time pair is unique. |
 
-### OOOI Times in a Flight
+### OOOI Times in a Flight {/* #oooi-times-in-a-flight */}
 
 The `vuelo` table stores four times:
 
@@ -52,7 +52,7 @@ The `vuelo` table stores four times:
 
 The database trigger `trg_actualizar_estado_vuelo_desde_evento` updates the flight status and OOOI times when an event has the `VALIDO` status.
 
-## 2. Reservations, Itineraries, and Connections
+## 2. Reservations, Itineraries, and Connections {/* #2-reservations-itineraries-and-connections */}
 
 | Table | Purpose | Main relationships or rules |
 |---|---|---|
@@ -66,7 +66,7 @@ The database trigger `trg_actualizar_estado_vuelo_desde_evento` updates the flig
 | `conexion_itinerario` | Link between two consecutive segments. | A trigger requires the same itinerary, consecutive segments, and a matching connection airport. |
 | `evaluacion_conexion` | History of connection time calculations. | States are `NORMAL`, `EN_RIESGO`, or `PERDIDA`; stores available and required minutes. |
 
-## 3. Disruptions, Compensation, and Communication
+## 3. Disruptions, Compensation, and Communication {/* #3-disruptions-compensation-and-communication */}
 
 | Table | Purpose | Main relationships or rules |
 |---|---|---|
@@ -82,7 +82,7 @@ The database trigger `trg_actualizar_estado_vuelo_desde_evento` updates the flig
 | `reubicacion` | Management of an alternative trip for an affected segment. | The segment and disruption must belong to the same flight. |
 | `notificacion` | Messages sent or scheduled for passengers. | Types include `CONEXION_RIESGO`, `COMPENSACION`, `REUBICACION`, and `INTERRUPCION`; channels are `EMAIL`, `SMS`, or `PUSH`. |
 
-## Documented Integrity Rules
+## Documented Integrity Rules {/* #documented-integrity-rules */}
 
 | Rule | Described implementation |
 |---|---|
