@@ -11,3 +11,9 @@ Estos seis ADR se adaptaron de «ADR VuelaData», el registro de diseño del pro
 - [004 Cómputo en ECS Fargate y mensajería RabbitMQ](./004-ecs-fargate.md)
 - [005 Red de AWS y gestión de secretos](./005-red-secretos.md)
 - [006 Notificaciones asíncronas por correo](./006-notificaciones.md)
+
+## Infraestructura en AWS {/* #aws-infrastructure */}
+
+![Arquitectura de VuelaData en AWS con fuentes de datos, ingesta mediante Lambda y RabbitMQ, procesamiento con Airflow y Spark, y analítica desde S3 con Glue, Athena y Power BI](/img/infraestructura_vueladata_aws.png)
+
+[Abrir el diagrama a tamaño completo](/img/infraestructura_vueladata_aws.png)
